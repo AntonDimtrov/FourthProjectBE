@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33414.496
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TravelEasy.ElectricVehicles.DB.Models", "TravelEasy.ElectricVehicles.DB.Models\TravelEasy.ElectricVehicles.DB.Models.csproj", "{6008737B-30A9-42FE-B869-DEE6859A4913}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6008737B-30A9-42FE-B869-DEE6859A4913}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{6008737B-30A9-42FE-B869-DEE6859A4913}.Debug|Any CPU.Build.0 = Release|Any CPU
+		{6008737B-30A9-42FE-B869-DEE6859A4913}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6008737B-30A9-42FE-B869-DEE6859A4913}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {806C477C-7114-4AA8-B7EF-F416A7578D48}
+	EndGlobalSection
+EndGlobal
