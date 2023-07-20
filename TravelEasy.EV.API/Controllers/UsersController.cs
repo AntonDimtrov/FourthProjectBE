@@ -11,7 +11,7 @@ namespace TravelEasy.EV.API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ElectricVehiclesContext _EVContext;
-
+        
         public UsersController(ElectricVehiclesContext EVContext)
         {
             _EVContext = EVContext;
@@ -52,5 +52,10 @@ namespace TravelEasy.EV.API.Controllers
 
         }
 
+        // DELETE api/<UsersController>/5
+        [HttpDelete("{id}")]
+        public void Delete(int id)
+        {
+        }
     }
 }
