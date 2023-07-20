@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TravelEasy.EV.DataLayer;
 
@@ -10,9 +11,11 @@ using TravelEasy.EV.DataLayer;
 namespace TravelEasy.EV.DataLayer.Migrations
 {
     [DbContext(typeof(ElectricVehiclesContext))]
-    partial class ElectricVehiclesContextModelSnapshot : ModelSnapshot
+    [Migration("20230719121947_UserAdd")]
+    partial class UserAdd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

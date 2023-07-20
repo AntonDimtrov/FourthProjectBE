@@ -7,9 +7,11 @@ namespace TravelEasy.EV.DataLayer
     {
         public DbSet<ElectricVehicle> ElectricVehicles { get; set;}
 
+        public DbSet<User> Users { get; set;}
         public ElectricVehiclesContext(DbContextOptions<ElectricVehiclesContext> options)
            : base(options)
         {
+
         }
     }
 }
