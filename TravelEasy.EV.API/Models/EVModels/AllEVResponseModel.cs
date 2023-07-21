@@ -1,6 +1,6 @@
 ﻿namespace TravelEasy.EV.API.Models.EVModels
 {
-    public class EVResponseAllModel
+    public class AllEVResponseModel
     {
         public string? Brand { get; set; }
         public string? Model { get; set; }
