@@ -1,61 +1,72 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TravelEasy.EV.API.Models;
 using TravelEasy.EV.DataLayer;
+using TravelEasy.ElectricVehicles.DB.Models;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
-namespace TravelEasy.EV.API.Controllers
+public class UsersController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class UsersController : ControllerBase
+    private readonly ElectricVehiclesContext _EVContext;
+
+    public UsersController(ElectricVehiclesContext EVContext)
     {
-        private readonly ElectricVehiclesContext _EVContext;
-        
-        public UsersController(ElectricVehiclesContext EVContext)
+        _EVContext = EVContext;
+    }
+
+    [HttpGet]
+    public IEnumerable<string> Get()
+    {
+        return new string[] { "value1", "value2" };
+    }
+
+    [HttpGet("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult Get(int id)
+    {
+        var user = _EVContext.Users.Find(id);
+        return user == null ? NotFound() : Ok(user);
+    }
+
+    [HttpPost("Login")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public IActionResult Post([FromBody] UserLoginRequestModel model)
+    {
+        User? user = _EVContext.Users.Where(u => u.Username == model.Username).FirstOrDefault();
+
+        if (user == null)
         {
-            _EVContext = EVContext;
+            return BadRequest();
         }
 
-        // GET: api/<UsersController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        if (user.Password != model.Password)
         {
-            return new string[] { "value1", "value2" };
+            return BadRequest();
         }
 
-        // GET api/<UsersController>/5
-        [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult Get(int id)
+        return Ok(user.Id);
+    }
+
+    [HttpPost("Register")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public IActionResult Post([FromBody] UserRegisterRequestModel model)
+    {
+        User? existingUser = _EVContext.Users.Where(u => u.Username == model.Username).FirstOrDefault();
+
+        if (existingUser != null)
         {
-            var user = _EVContext.Users.Find(id);
-            return user == null? NotFound(user) : Ok(user);
+            return BadRequest("User already exists");
         }
 
-        // POST api/<UsersController>
-        [HttpPost("Login")]
-        
-        public IActionResult Post([FromBody] UserLoginRequestModel model)
-        {
-            var response = new UserLoginResponseModel();
-            response.Id = 1;
-            return Ok(response);
-        }
+        User user = new();
+        user.Username = model.Username;
+        user.Password = model.Password;
+        user.Email = model.Email;
 
-        // PUT api/<UsersController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] UserLoginRequestModel model)
-        {
-            
+        _EVContext.Users.Add(user);
+        _EVContext.SaveChanges();
 
-        }
-
-        // DELETE api/<UsersController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
+        return Created(nameof(UsersController), user.Id);
     }
 }
