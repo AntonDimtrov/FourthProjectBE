@@ -29,6 +29,12 @@ namespace TravelEasy.EV.API.Controllers
             }
 
             var vehicles = _EVContext.ElectricVehicles;
+
+            if (!vehicles.Any())
+            {
+                return NotFound("No EVs in database");
+            }
+
             ICollection<AllEVResponseModel> models = new List<AllEVResponseModel>();
 
             foreach (var vehicle in vehicles)
@@ -43,10 +49,7 @@ namespace TravelEasy.EV.API.Controllers
                 models.Add(newModel);
             }
 
-            if (!models.Any())
-            {
-                return NotFound("No EVs in database");
-            }
+           
 
             return Ok(models);
 
