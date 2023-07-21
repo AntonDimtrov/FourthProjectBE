@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TravelEasy.EV.API.Models;
 using TravelEasy.EV.DataLayer;
 using TravelEasy.ElectricVehicles.DB.Models;
+using TravelEasy.EV.API.Models.UserModels;
 
 public class UsersController : ControllerBase
 {
