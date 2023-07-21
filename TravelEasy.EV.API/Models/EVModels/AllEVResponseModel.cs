@@ -1,9 +1,9 @@
 ﻿namespace TravelEasy.EV.API.Models.EVModels
 {
-    public class EVRequestAllModel
+    public class EVResponseAllModel
     {
         public string? Brand { get; set; }
         public string? Model { get; set; }
-        public string? PricePerDay { get; set; }
+        public decimal? PricePerDay { get; set; }
     }
 }
