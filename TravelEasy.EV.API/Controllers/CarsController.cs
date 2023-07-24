@@ -53,7 +53,44 @@ namespace TravelEasy.EV.API.Controllers
             return Ok(models);
         }
 
- 
+        // Get all available electric vehicles
+        [HttpGet("available")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public ActionResult<ICollection<AllEVResponseModel>> GetAvailable([System.Web.Http.FromUri] int userId)
+        {
+            // Check if user exists
+            if (!_EVContext.Users.Where(u => u.Id == userId).Any())
+            {
+                return Unauthorized();
+            }
+
+            var vehicles = _EVContext.ElectricVehicles.Where(ev => !ev.IsBooked);
+
+            if (!vehicles.Any())
+            {
+                return Ok("No free EVs in database");
+            }
+
+            ICollection<AllEVResponseModel> models = new List<AllEVResponseModel>();
+
+            foreach (var vehicle in vehicles)
+            {
+                AllEVResponseModel newModel = new()
+                {
+                    Brand = vehicle.Brand,
+                    Model = vehicle.Model,
+                    PricePerDay = vehicle.PricePerDay
+                };
+
+                models.Add(newModel);
+            }
+
+            return Ok(models);
+        }
+
+
 
         // Get by ID
         [HttpGet("{id}")]
@@ -86,7 +123,5 @@ namespace TravelEasy.EV.API.Controllers
 
             return Ok(result);
         }
-
-        
     }
 }
