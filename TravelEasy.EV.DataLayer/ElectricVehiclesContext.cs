@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TravelEasy.ElectricVehicles.DB.Models;
+using TravelEasy.EV.DB.Models.Diesel;
 
 namespace TravelEasy.EV.DataLayer
 {
@@ -7,6 +8,8 @@ namespace TravelEasy.EV.DataLayer
     {
         public DbSet<ElectricVehicle> ElectricVehicles { get; set;}
         public DbSet<User> Users { get; set;}
+
+        public DbSet<Booking> Bookings { get; set;}
 
         public ElectricVehiclesContext()
         { }

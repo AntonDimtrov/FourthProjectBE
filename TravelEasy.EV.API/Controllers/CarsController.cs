@@ -24,7 +24,8 @@ namespace TravelEasy.EV.API.Controllers
         public ActionResult<ICollection<AllEVResponseModel>> Get([System.Web.Http.FromUri] int userId)
         {
             // Check if user exists
-            if (!_EVContext.Users.Where(u => u.Id == userId).Any()){
+            if (!_EVContext.Users.Where(u => u.Id == userId).Any())
+            {
                 return Unauthorized();
             }
 
@@ -32,7 +33,7 @@ namespace TravelEasy.EV.API.Controllers
 
             if (!vehicles.Any())
             {
-                return NotFound("No EVs in database");
+                return Ok("No EVs in database");
             }
 
             ICollection<AllEVResponseModel> models = new List<AllEVResponseModel>();
@@ -49,11 +50,10 @@ namespace TravelEasy.EV.API.Controllers
                 models.Add(newModel);
             }
 
-           
-
             return Ok(models);
-
         }
+
+ 
 
         // Get by ID
         [HttpGet("{id}")]
@@ -86,5 +86,7 @@ namespace TravelEasy.EV.API.Controllers
 
             return Ok(result);
         }
+
+        
     }
 }
