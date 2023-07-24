@@ -69,5 +69,15 @@ namespace TravelEasy.EV.API.Controllers
 
             return Created(nameof(UsersController), user.Id);
         }
+
+        [HttpDelete("{id}")]
+        public void Delete(int userId)
+        {
+            User? user = _EVContext.Users.Where(u => u.Id == 5).FirstOrDefault();
+            if (user != null)
+            {
+                _EVContext.Remove(user);
+            }
+        }
     }
 }
