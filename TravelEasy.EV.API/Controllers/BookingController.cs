@@ -22,8 +22,12 @@ namespace TravelEasy.EV.API.Controllers
             _EVContext = EVcontext;
         }
 
+        // Get user booked cars
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("user-booked-cars")]
-        public ActionResult<ICollection<BookingResponseModel>> GetBookedCars(int userId)
+        public ActionResult<ICollection<AllEVResponseModel>> GetBookedCars(int userId)
         {
             // Check if user exists
             if (!_EVContext.Users.Where(u => u.Id == userId).Any())
@@ -33,75 +37,99 @@ namespace TravelEasy.EV.API.Controllers
 
             var bookings = _EVContext.Bookings.Where(b => b.UserId == userId);
 
+            //Check if user has any booked cars
             if (bookings.IsNullOrEmpty())
             {
                 return Ok("User has no booked cars");
             }
 
-            ICollection<BookingResponseModel> models = new List<BookingResponseModel>();
+            ICollection<AllEVResponseModel> models = new List<AllEVResponseModel>();
 
             foreach (var booking in bookings)
             {
-                BookingResponseModel model = new()
+                ElectricVehicle? vehicle = _EVContext.ElectricVehicles.Where(ev => ev.Id == booking.CarId).FirstOrDefault();
+
+                AllEVResponseModel newModel = new()
                 {
-                    CarId = booking.CarId
+                    Brand = vehicle.Brand,
+                    Model = vehicle.Model,
+                    PricePerDay = vehicle.PricePerDay
                 };
 
-                models.Add(model);
+                models.Add(newModel);
             }
             return Ok(models);
         }
 
-        [HttpGet("{id}")]
-        public string Get(int id)
+        // Get booking by car Id
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [HttpGet("{carId}")]
+        public ActionResult<Booking> Get(int carId)
         {
-            return "value";
+            // Check if booking exists
+            Booking? booking = _EVContext.Bookings.Where(b => b.CarId == carId).FirstOrDefault();
+
+            if (booking == null)
+            {
+                return BadRequest("Car is not booked");
+            }
+
+            return Ok(booking);
         }
 
         [HttpPost]
-        public ActionResult<BookingResponseModel> Post(int userId, int carId)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public ActionResult<BookingResponseModel> Post([FromBody] BookingRequestModel request)
         {
             // Check if user exists
-            if (!_EVContext.Users.Where(u => u.Id == userId).Any())
+            if (!_EVContext.Users.Where(u => u.Id == request.UserId).Any())
             {
                 return Unauthorized("User does not exist");
             }
 
-            ElectricVehicle? vehicle = _EVContext.ElectricVehicles.Where(ev => ev.Id == carId).FirstOrDefault();
+            ElectricVehicle? vehicle = _EVContext.ElectricVehicles.Where(ev => ev.Id == request.CarId).FirstOrDefault();
 
             // Check if car exists
             if (vehicle == null)
             {
-                return Unauthorized("Car does not exist");
+                return BadRequest("Car does not exist");
             }
 
             // Check if car is available
             if (vehicle.IsBooked)
             {
-                return BadRequest("Car is already booked");
+                //set is booked successful
+                return Ok("Car is already booked");
             }
 
+            //remove prop move to other dbset
             vehicle.IsBooked = true;
 
             BookingResponseModel model = new()
             {
-                CarId = carId
+                //other props
+                CarId = request.CarId
             };
 
             Booking newBooking = new()
             {
-                CarId = carId,
-                UserId = userId,
+                // dates
+                CarId = request.CarId,
+                UserId = request.UserId
             };
 
-            /*_EVContext.Bookings.Add(new Booking(CarId = carId, UserId = userId));
-            _EVContext.SaveChanges();*/
+            _EVContext.Bookings.Add(newBooking);
+            _EVContext.SaveChanges();
 
             return Ok(model);
         }
 
-        [HttpPut("makeCarAvailable")]
-        public ActionResult<BookingResponseModel> Put([FromBody] int userId, int carId)
+        [HttpPut("cancel-booking")]
+        public ActionResult<BookingResponseModel> Put(int userId, int carId)
         {
             ElectricVehicle? ev = _EVContext.ElectricVehicles.Where(ev => ev.Id == carId).FirstOrDefault();
 

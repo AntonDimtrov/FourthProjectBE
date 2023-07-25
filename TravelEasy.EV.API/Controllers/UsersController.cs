@@ -59,10 +59,12 @@ namespace TravelEasy.EV.API.Controllers
                 return BadRequest("User already exists");
             }
 
-            User user = new();
-            user.Username = model.Username;
-            user.Password = model.Password;
-            user.Email = model.Email;
+            User user = new()
+            {
+                Username = model.Username,
+                Password = model.Password,
+                Email = model.Email
+            };
 
             _EVContext.Users.Add(user);
             _EVContext.SaveChanges();
