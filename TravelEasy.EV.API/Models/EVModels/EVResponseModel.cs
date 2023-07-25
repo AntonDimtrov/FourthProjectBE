@@ -7,5 +7,7 @@
         public int? HorsePower { get; set; }
         public int? Range { get; set; }
         public decimal? PricePerDay { get; set; }
+        public string? ImageURL { get; set; }
+        public string? Category { get;set; }
     }
 }

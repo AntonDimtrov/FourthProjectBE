@@ -2,18 +2,27 @@
 using TravelEasy.EV.DataLayer;
 using TravelEasy.ElectricVehicles.DB.Models;
 using TravelEasy.EV.API.Models.EVModels;
-
+using Azure.Core;
+using TravelEasy.EV.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace TravelEasy.EV.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/cars")]
     [ApiController]
     public class CarsController : ControllerBase
     {
         private readonly ElectricVehiclesContext _EVContext;
-        public CarsController(ElectricVehiclesContext EVcontext)
+        private readonly IUserService _userService;
+        private readonly IElectricVehicleService _vehicleService;
+        private readonly IBookingService _bookingService;
+        public CarsController(ElectricVehiclesContext EVcontext, IUserService userService,
+            IElectricVehicleService vehicleService, IBookingService bookingService)
         {
             _EVContext = EVcontext;
+            _userService = userService;
+            _vehicleService = vehicleService;
+            _bookingService = bookingService;
         }
 
         // Get all electric vehicles
@@ -60,22 +69,21 @@ namespace TravelEasy.EV.API.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<ICollection<AllEVResponseModel>> GetAvailable([System.Web.Http.FromUri] int userId)
         {
-            // Check if user exists
-            if (!_EVContext.Users.Where(u => u.Id == userId).Any())
+            // Check if user does not exist
+            if (!_userService.UserExists(userId))
             {
-                return Unauthorized();
+                return Unauthorized("User does not exist");
             }
 
-            var vehicles = _EVContext.ElectricVehicles.Where(ev => !ev.IsBooked);
-
-            if (!vehicles.Any())
+            var bookedVehicles = _bookingService.GetBookedVehicles();
+            if (!bookedVehicles.Any())
             {
                 return Ok("No free EVs in database");
             }
 
             ICollection<AllEVResponseModel> models = new List<AllEVResponseModel>();
 
-            foreach (var vehicle in vehicles)
+            foreach (var vehicle in bookedVehicles)
             {
                 AllEVResponseModel newModel = new()
                 {
@@ -99,10 +107,10 @@ namespace TravelEasy.EV.API.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<EVResponseModel> Get(int id, [System.Web.Http.FromUri] int userId)
         {
-            // Check if user exists
-            if (!_EVContext.Users.Where(u => u.Id == userId).Any())
+            // Check if user does not exist
+            if (!_userService.UserExists(userId))
             {
-                return Unauthorized();
+                return Unauthorized("User does not exist");
             }
 
             ElectricVehicle? ev = _EVContext.ElectricVehicles.Where(ev => ev.Id == id).FirstOrDefault();
