@@ -169,7 +169,7 @@ namespace TravelEasy.EV.DataLayer
                     }
                 );
 
-                context.Brand.AddRange(
+                context.Brands.AddRange(
                     new Brand
                     {
                        Name="BMW"
@@ -195,7 +195,7 @@ namespace TravelEasy.EV.DataLayer
                         Name = "Volvo"
                     });
 
-                context.Category.AddRange(
+                context.Categories.AddRange(
                    new Category
                    {
                        Name = "recently-added"

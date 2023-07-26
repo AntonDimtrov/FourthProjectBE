@@ -10,8 +10,8 @@ namespace TravelEasy.EV.DataLayer
         public DbSet<User> Users { get; set;}
 
         public DbSet<Booking> Bookings { get; set;}
-        public DbSet<Category> Category { get; set; }
-        public DbSet<Brand> Brand { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Brand> Brands { get; set; }
 
         public ElectricVehiclesContext()
         { }
