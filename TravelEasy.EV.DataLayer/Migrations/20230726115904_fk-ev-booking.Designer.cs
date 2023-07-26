@@ -12,8 +12,8 @@ using TravelEasy.EV.DataLayer;
 namespace TravelEasy.EV.DataLayer.Migrations
 {
     [DbContext(typeof(ElectricVehiclesContext))]
-    [Migration("20230725124224_initial")]
-    partial class initial
+    [Migration("20230726115904_fk-model-update")]
+    partial class fkmodelupdate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,7 +33,7 @@ namespace TravelEasy.EV.DataLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CarId")
+                    b.Property<int>("ElectricVehicleId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("EndDate")
@@ -46,6 +46,10 @@ namespace TravelEasy.EV.DataLayer.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ElectricVehicleId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Bookings");
                 });
@@ -78,6 +82,7 @@ namespace TravelEasy.EV.DataLayer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("PricePerDay")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Range")
@@ -111,6 +116,25 @@ namespace TravelEasy.EV.DataLayer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("TravelEasy.EV.DB.Models.Diesel.Booking", b =>
+                {
+                    b.HasOne("TravelEasy.ElectricVehicles.DB.Models.ElectricVehicle", "ElectricVehicle")
+                        .WithMany()
+                        .HasForeignKey("ElectricVehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TravelEasy.ElectricVehicles.DB.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ElectricVehicle");
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

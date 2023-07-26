@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TravelEasy.EV.DataLayer;
 
@@ -11,9 +12,11 @@ using TravelEasy.EV.DataLayer;
 namespace TravelEasy.EV.DataLayer.Migrations
 {
     [DbContext(typeof(ElectricVehiclesContext))]
-    partial class ElectricVehiclesContextModelSnapshot : ModelSnapshot
+    [Migration("20230726111228_Intial")]
+    partial class Intial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,11 +27,11 @@ namespace TravelEasy.EV.DataLayer.Migrations
 
             modelBuilder.Entity("TravelEasy.EV.DB.Models.Diesel.Booking", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int?>("Id"));
 
                     b.Property<int>("ElectricVehicleId")
                         .HasColumnType("int");
@@ -44,60 +47,27 @@ namespace TravelEasy.EV.DataLayer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ElectricVehicleId");
-
-                    b.HasIndex("UserId");
-
                     b.ToTable("Bookings");
-                });
-
-            modelBuilder.Entity("TravelEasy.EV.DB.Models.Diesel.Brand", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Brand");
-                });
-
-            modelBuilder.Entity("TravelEasy.EV.DB.Models.Diesel.Category", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Category");
                 });
 
             modelBuilder.Entity("TravelEasy.ElectricVehicles.DB.Models.ElectricVehicle", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int?>("Id"));
 
-                    b.Property<int>("BrandId")
+                    b.Property<int>("BookingId")
                         .HasColumnType("int");
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
+                    b.Property<string>("Brand")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("HorsePowers")
                         .HasColumnType("int");
@@ -119,9 +89,7 @@ namespace TravelEasy.EV.DataLayer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BrandId");
-
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("BookingId");
 
                     b.ToTable("ElectricVehicles");
                 });
@@ -151,42 +119,20 @@ namespace TravelEasy.EV.DataLayer.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("TravelEasy.EV.DB.Models.Diesel.Booking", b =>
-                {
-                    b.HasOne("TravelEasy.ElectricVehicles.DB.Models.ElectricVehicle", "ElectricVehicle")
-                        .WithMany()
-                        .HasForeignKey("ElectricVehicleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TravelEasy.ElectricVehicles.DB.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ElectricVehicle");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TravelEasy.ElectricVehicles.DB.Models.ElectricVehicle", b =>
                 {
-                    b.HasOne("TravelEasy.EV.DB.Models.Diesel.Brand", "Brand")
-                        .WithMany()
-                        .HasForeignKey("BrandId")
+                    b.HasOne("TravelEasy.EV.DB.Models.Diesel.Booking", "Booking")
+                        .WithMany("ElectricVehicles")
+                        .HasForeignKey("BookingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TravelEasy.EV.DB.Models.Diesel.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Booking");
+                });
 
-                    b.Navigation("Brand");
-
-                    b.Navigation("Category");
+            modelBuilder.Entity("TravelEasy.EV.DB.Models.Diesel.Booking", b =>
+                {
+                    b.Navigation("ElectricVehicles");
                 });
 #pragma warning restore 612, 618
         }
