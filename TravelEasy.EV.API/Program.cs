@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TravelEasy.EV.DataLayer;
 using TravelEasy.EV.Infrastructure;
+using TravelEasy.EV.Infrastructure.Abstract;
 
 var builder = WebApplication.CreateBuilder(args);
 

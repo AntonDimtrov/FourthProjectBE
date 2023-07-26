@@ -1,5 +1,6 @@
 ﻿using TravelEasy.ElectricVehicles.DB.Models;
 using TravelEasy.EV.DataLayer;
+using TravelEasy.EV.Infrastructure.Abstract;
 
 namespace TravelEasy.EV.Infrastructure
 {

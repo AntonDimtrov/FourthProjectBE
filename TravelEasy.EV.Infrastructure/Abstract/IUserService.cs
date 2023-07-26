@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TravelEasy.ElectricVehicles.DB.Models;
 
-namespace TravelEasy.EV.Infrastructure
+namespace TravelEasy.EV.Infrastructure.Abstract
 {
     public interface IUserService
     {
