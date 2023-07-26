@@ -28,17 +28,8 @@ namespace TravelEasy.EV.Infrastructure
 
         public ICollection<ElectricVehicle> GetAvailableVehicles()
         {
-            ICollection<ElectricVehicle> availableVehicles = new List<ElectricVehicle>();
-            var vehicles = _vehicleService.GetVehicles();
-
-            foreach(var vehicle in vehicles)
-            {
-                if (GetBookingByCarID(vehicle.Id) == null)
-                {
-                    availableVehicles.Add(vehicle);
-                }
-            }
-            return availableVehicles;
+            List<int> bookedIds = _EVContext.Bookings.Select(b => b.ElectricVehicleId).ToList();
+            return _EVContext.ElectricVehicles.Where(ev => !bookedIds.Contains(ev.Id)).ToList();
         }
 
         public ICollection<ElectricVehicle> GetBookedVehicles()
@@ -47,14 +38,14 @@ namespace TravelEasy.EV.Infrastructure
 
             foreach(var booking in _EVContext.Bookings)
             {
-                bookedVehicles.Add(_vehicleService.GetVehicleByID(booking.CarId));
+                bookedVehicles.Add(_vehicleService.GetVehicleByID(booking.ElectricVehicleId));
             }
             return bookedVehicles;
         }
 
         public Booking GetBookingByCarID(int carId)
         {
-            return _EVContext.Bookings.Where(b => b.CarId == carId).FirstOrDefault();
+            return _EVContext.Bookings.Where(b => b.ElectricVehicleId == carId).FirstOrDefault();
         }
 
         public Booking GetBookingByID(int bookingId)

@@ -47,11 +47,11 @@ namespace TravelEasy.EV.API.Controllers
 
             foreach (var booking in userBookings)
             {
-                ElectricVehicle? car = _vehicleService.GetVehicleByID(booking.CarId);
+                ElectricVehicle? car = _vehicleService.GetVehicleByID(booking.ElectricVehicleId);
 
                 AllEVResponseModel newModel = new()
                 {
-                    Brand = car.Brand,
+                    BrandId = car.BrandId,
                     Model = car.Model,
                     PricePerDay = car.PricePerDay
                 };
@@ -105,7 +105,7 @@ namespace TravelEasy.EV.API.Controllers
 
             Booking newBooking = new()
             {
-                CarId = request.CarId,
+                ElectricVehicleId = request.CarId,
                 UserId = request.UserId,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate

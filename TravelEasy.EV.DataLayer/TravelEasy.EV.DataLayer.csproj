@@ -14,11 +14,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="TravelEasy.EV.DB.Models.Diezel" Version="1.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Migrations\" />
+    <PackageReference Include="TravelEasy.EV.DB.Models.Diezel" Version="1.0.5" />
   </ItemGroup>
 
 </Project>

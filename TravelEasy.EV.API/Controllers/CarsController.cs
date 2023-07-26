@@ -46,7 +46,7 @@ namespace TravelEasy.EV.API.Controllers
             {
                 AllEVResponseModel newModel = new()
                 {
-                    Brand = vehicle.Brand,
+                    BrandId = vehicle.BrandId,
                     Model = vehicle.Model,
                     PricePerDay = vehicle.PricePerDay
                 };
@@ -82,7 +82,7 @@ namespace TravelEasy.EV.API.Controllers
             {
                 AllEVResponseModel newModel = new()
                 {
-                    Brand = vehicle.Brand,
+                    BrandId = vehicle.BrandId,
                     Model = vehicle.Model,
                     PricePerDay = vehicle.PricePerDay
                 };
@@ -104,11 +104,10 @@ namespace TravelEasy.EV.API.Controllers
         public ActionResult<EVResponseModel> Get(int id, [System.Web.Http.FromUri] int userId)
         {
             // Check if user does not exist
-            if (!_userService.UserExists(id))
+            if (!_userService.UserExists(userId))
             {
                 return Unauthorized("User does not exist");
             }
-
            
             ElectricVehicle? ev = _vehicleService.GetVehicleByID(id);
 
@@ -119,7 +118,8 @@ namespace TravelEasy.EV.API.Controllers
 
             EVResponseModel result = new()
             {
-                Brand = ev.Brand,
+
+                BrandId = ev.BrandId,
                 Model = ev.Model,
                 HorsePower = ev.HorsePowers,
                 Range = ev.Range,
@@ -130,3 +130,4 @@ namespace TravelEasy.EV.API.Controllers
         }
     }
 }
+
