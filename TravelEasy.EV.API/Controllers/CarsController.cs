@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TravelEasy.EV.DataLayer;
 using TravelEasy.ElectricVehicles.DB.Models;
 using TravelEasy.EV.API.Models.EVModels;
-using Azure.Core;
 using TravelEasy.EV.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 
 namespace TravelEasy.EV.API.Controllers
 {
@@ -12,14 +9,12 @@ namespace TravelEasy.EV.API.Controllers
     [ApiController]
     public class CarsController : ControllerBase
     {
-        private readonly ElectricVehiclesContext _EVContext;
         private readonly IUserService _userService;
         private readonly IElectricVehicleService _vehicleService;
         private readonly IBookingService _bookingService;
-        public CarsController(ElectricVehiclesContext EVcontext, IUserService userService,
+        public CarsController(IUserService userService,
             IElectricVehicleService vehicleService, IBookingService bookingService)
         {
-            _EVContext = EVcontext;
             _userService = userService;
             _vehicleService = vehicleService;
             _bookingService = bookingService;
@@ -33,12 +28,12 @@ namespace TravelEasy.EV.API.Controllers
         public ActionResult<ICollection<AllEVResponseModel>> Get([System.Web.Http.FromUri] int userId)
         {
             // Check if user exists
-            if (!_EVContext.Users.Where(u => u.Id == userId).Any())
+            if (!_userService.UserExists(userId))
             {
                 return Unauthorized();
             }
 
-            var vehicles = _EVContext.ElectricVehicles;
+            var vehicles = _vehicleService.GetVehicles();
 
             if (!vehicles.Any())
             {
@@ -105,7 +100,7 @@ namespace TravelEasy.EV.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public ActionResult<EVResponseModel> Get(int id, [System.Web.Http.FromUri] int userId)
+        public ActionResult<EVResponseModel> Get(int carId, [System.Web.Http.FromUri] int userId)
         {
             // Check if user does not exist
             if (!_userService.UserExists(userId))
@@ -113,7 +108,7 @@ namespace TravelEasy.EV.API.Controllers
                 return Unauthorized("User does not exist");
             }
 
-            ElectricVehicle? ev = _EVContext.ElectricVehicles.Where(ev => ev.Id == id).FirstOrDefault();
+            ElectricVehicle? ev = _vehicleService.GetVehicleByID(carId);
 
             if (ev == null)
             {

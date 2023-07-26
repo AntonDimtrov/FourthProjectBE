@@ -10,7 +10,6 @@ namespace TravelEasy.EV.Infrastructure
         {
             _EVContext = EVContext;
         }
-
         public bool ExistingUsersInDB()
         {
             return _EVContext.Users.Any();

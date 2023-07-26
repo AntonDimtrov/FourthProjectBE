@@ -1,9 +1,7 @@
-﻿using Azure.Core;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using TravelEasy.ElectricVehicles.DB.Models;
 using TravelEasy.EV.API.Models.BookingModels;
 using TravelEasy.EV.API.Models.EVModels;
-using TravelEasy.EV.DataLayer;
 using TravelEasy.EV.DB.Models.Diesel;
 using TravelEasy.EV.Infrastructure;
 
@@ -13,15 +11,12 @@ namespace TravelEasy.EV.API.Controllers
     [ApiController]
     public class BookingController : ControllerBase
     {
-        //remove this
-        private readonly ElectricVehiclesContext _EVContext;
         private readonly IUserService _userService;
         private readonly IElectricVehicleService _vehicleService;
         private readonly IBookingService _bookingService;
-        public BookingController(ElectricVehiclesContext EVcontext, IUserService userService,
+        public BookingController(IUserService userService,
             IElectricVehicleService vehicleService, IBookingService bookingService)
         {
-            _EVContext = EVcontext;
             _userService = userService;
             _vehicleService = vehicleService;
             _bookingService = bookingService;
@@ -39,21 +34,20 @@ namespace TravelEasy.EV.API.Controllers
                 return Unauthorized("User does not exist");
             }
 
-
             var userBookings = _bookingService.GetUserBookings(userId);
 
             //Check if user has any booked cars
             if (!userBookings.Any())
             {
                 //?
-                return Ok("User has no booked cars");
+                return NotFound("User has no booked cars");
             }
 
             ICollection<AllEVResponseModel> models = new List<AllEVResponseModel>();
 
             foreach (var booking in userBookings)
             {
-                ElectricVehicle? car = _EVContext.ElectricVehicles.Where(ev => ev.Id == booking.CarId).FirstOrDefault();
+                ElectricVehicle? car = _vehicleService.GetVehicleByID(booking.CarId);
 
                 AllEVResponseModel newModel = new()
                 {
@@ -74,7 +68,7 @@ namespace TravelEasy.EV.API.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<Booking> Get(int carId)
         {
-            Booking? booking = _EVContext.Bookings.Where(b => b.CarId == carId).FirstOrDefault();
+            Booking? booking = _bookingService.GetBookingByCarID(carId);
 
             // Check if booking exists
             if (booking == null)
@@ -98,13 +92,13 @@ namespace TravelEasy.EV.API.Controllers
             }
 
             // Check if car does not exist
-            if (!_vehicleService.VehicleExists(request.CarId)) 
+            if (!_vehicleService.VehicleExists(request.CarId))
             {
                 return BadRequest("Car does not exist");
             }
 
             // Check if car is available
-            if (_EVContext.Bookings.Where(b => b.CarId == request.CarId).Any())
+            if (_vehicleService.VehicleIsBooked(request.CarId))
             {
                 return Ok("Car is already booked");
             }
@@ -117,9 +111,9 @@ namespace TravelEasy.EV.API.Controllers
                 EndDate = request.EndDate
             };
 
-            _EVContext.Bookings.Add(newBooking);
-            _EVContext.SaveChanges();
+            _bookingService.AddBooking(newBooking);
 
+            ///?
             BookingResponseModel model = new()
             {
                 SuccsessfullyBooked = true
@@ -142,12 +136,12 @@ namespace TravelEasy.EV.API.Controllers
             }
 
             // Check if car exists
-            if (!_EVContext.ElectricVehicles.Where(ev => ev.Id == request.CarId).Any())
+            if (!_vehicleService.VehicleExists(request.CarId))
             {
                 return NotFound($"Car with id {request.CarId} doesn't exist");
             }
 
-            Booking? booking = _EVContext.Bookings.Where(ev => ev.Id == request.CarId).FirstOrDefault();
+            Booking? booking = _bookingService.GetBookingByCarID(request.CarId);
 
             // Check if car is booked
             if (booking == null)
@@ -161,8 +155,7 @@ namespace TravelEasy.EV.API.Controllers
                 return BadRequest("Car is booked by another user");
             }
 
-            _EVContext.Bookings.Remove(booking);
-            _EVContext.SaveChanges();
+            _bookingService.RemoveBooking(booking);
 
             return Ok("Booking cancelled successfully");
         }

@@ -1,16 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TravelEasy.EV.DataLayer;
 using TravelEasy.ElectricVehicles.DB.Models;
 using TravelEasy.EV.API.Models.UserModels;
 using TravelEasy.EV.Infrastructure;
-using Azure.Identity;
 
 namespace TravelEasy.EV.API.Controllers
 {
     [Route("api/users")]
     public class UsersController : ControllerBase
     {
-        private readonly ElectricVehiclesContext _EVContext;
         private readonly IUserService _userService;
         private readonly IElectricVehicleService _vehicleService;
         private readonly IBookingService _bookingService;
@@ -71,7 +68,7 @@ namespace TravelEasy.EV.API.Controllers
 
             if (existingUser != null)
             {
-                return BadRequest("User already exists");
+                return BadRequest();
             }
 
             User user = new()
@@ -89,12 +86,7 @@ namespace TravelEasy.EV.API.Controllers
         [HttpDelete("{id}")]
         public void Remove(int userId)
         {
-            User? user = _userService.GetUserByID(userId);
-
-            if (user != null)
-            {
-                _userService.RemoveUser(user);
-            }
+            _userService.RemoveUser(_userService.GetUserByID(userId));
         }
     }
 }

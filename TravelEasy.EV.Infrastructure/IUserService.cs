@@ -16,6 +16,5 @@ namespace TravelEasy.EV.Infrastructure
         public ICollection<User> GetUsers();
         public void AddUser(User user);
         public void RemoveUser(User user);
-
     }
 }

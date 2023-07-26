@@ -12,5 +12,8 @@ namespace TravelEasy.EV.Infrastructure
         public bool VehicleExists(int vehicleId);
         public bool VehicleIsBooked(int vehicleId);
         public ElectricVehicle GetVehicleByID(int vehicleId);
+        public ICollection<ElectricVehicle> GetVehicles();
+        public void AddVehicle(ElectricVehicle vehicle);
+        public void RemoveVehicle(ElectricVehicle vehicle);
     }
 }
