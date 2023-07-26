@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TravelEasy.ElectricVehicles.DB.Models;
 using TravelEasy.EV.API.Models.UserModels;
-using TravelEasy.EV.Infrastructure;
+using TravelEasy.EV.Infrastructure.Abstract;
 
 namespace TravelEasy.EV.API.Controllers
 {
@@ -83,10 +83,11 @@ namespace TravelEasy.EV.API.Controllers
             return Created(nameof(UsersController), user.Id);
         }
 
-        [HttpDelete("{id}")]
-        public void Remove(int userId)
+        [HttpDelete]
+        [Route("{id}")]
+        public void Remove(int id)
         {
-            _userService.RemoveUser(_userService.GetUserByID(userId));
+            _userService.RemoveUser(_userService.GetUserByID(id));
         }
     }
 }

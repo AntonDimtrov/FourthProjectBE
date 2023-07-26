@@ -3,7 +3,7 @@ using TravelEasy.ElectricVehicles.DB.Models;
 using TravelEasy.EV.API.Models.BookingModels;
 using TravelEasy.EV.API.Models.EVModels;
 using TravelEasy.EV.DB.Models.Diesel;
-using TravelEasy.EV.Infrastructure;
+using TravelEasy.EV.Infrastructure.Abstract;
 
 namespace TravelEasy.EV.API.Controllers
 {
