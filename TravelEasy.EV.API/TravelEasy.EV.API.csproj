@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TravelEasy.EV.DataLayer\TravelEasy.EV.DataLayer.csproj" />
+    <ProjectReference Include="..\TravelEasy.EV.Infrastructure\TravelEasy.EV.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
