@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TravelEasy.ElectricVehicles.DB.Models;
-using TravelEasy.EV.API.Models.UserModels;
 using TravelEasy.EV.Infrastructure.Abstract;
+using TravelEasy.EV.Infrastructure.Models.UserModels;
 
 namespace TravelEasy.EV.API.Controllers
 {
@@ -11,8 +10,10 @@ namespace TravelEasy.EV.API.Controllers
         private readonly IUserService _userService;
         private readonly IElectricVehicleService _vehicleService;
         private readonly IBookingService _bookingService;
-        public UsersController(IUserService userService,
-            IElectricVehicleService vehicleService, IBookingService bookingService)
+        public UsersController(
+            IUserService userService,
+            IElectricVehicleService vehicleService,
+            IBookingService bookingService)
         {
             _userService = userService;
             _vehicleService = vehicleService;
@@ -22,7 +23,7 @@ namespace TravelEasy.EV.API.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult Get(int id)
+        public ActionResult<UserLoginRequestModel> Get(int id)
         {
             var user = _userService.GetUserByID(id);
             return user == null ? NotFound() : Ok(user);
@@ -31,10 +32,10 @@ namespace TravelEasy.EV.API.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<User> GetAll()
+        public ActionResult<List<int>> GetAll()
         {
             bool databaseHasUsers = _userService.ExistingUsersInDB();
-            return databaseHasUsers ? Ok(_userService.GetUsers()) : NotFound("No users in DB");
+            return databaseHasUsers ? Ok(_userService.GetUsers().Select(u => u.Id).ToList()) : NotFound("No users in DB");
         }
 
         [HttpPost]
@@ -43,19 +44,19 @@ namespace TravelEasy.EV.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult Post([FromBody] UserLoginRequestModel model)
         {
-            User? user = _userService.GetUserByUsername(model.Username);
+            int? userId = _userService.GetUserByUsername(model.Username).Id;
 
-            if (user == null)
+            if (userId == null)
             {
                 return BadRequest();
             }
 
-            if (user.Password != model.Password)
+            if (_userService.GetUserByID((int)userId).Password != model.Password)
             {
                 return BadRequest();
             }
 
-            return Ok(user.Id);
+            return Ok(userId);
         }
 
         [HttpPost]
@@ -64,30 +65,23 @@ namespace TravelEasy.EV.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult Post([FromBody] UserRegisterRequestModel model)
         {
-            User? existingUser = _userService.GetUserByUsername(model.Username);
+            int? userId = _userService.GetUserByUsername(model.Username).Id;
 
-            if (existingUser != null)
+            if (userId != null)
             {
                 return BadRequest();
             }
 
-            User user = new()
-            {
-                Username = model.Username,
-                Password = model.Password,
-                Email = model.Email
-            };
+            _userService.RegisterUser(model.Username, model.Email, model.Password);
 
-            _userService.AddUser(user);
-
-            return Created(nameof(UsersController), user.Id);
+            return Created(nameof(UsersController), userId);
         }
 
         [HttpDelete]
         [Route("{id}")]
         public void Remove(int id)
         {
-            _userService.RemoveUser(_userService.GetUserByID(id));
+            _userService.RemoveUserFromDB(_userService.GetUserByID(id));
         }
     }
 }

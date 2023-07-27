@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TravelEasy.ElectricVehicles.DB.Models;
-using TravelEasy.EV.API.Models.BookingModels;
-using TravelEasy.EV.API.Models.EVModels;
-using TravelEasy.EV.DB.Models.Diesel;
 using TravelEasy.EV.Infrastructure.Abstract;
+using TravelEasy.EV.Infrastructure.Models.BookingModels;
+using TravelEasy.EV.Infrastructure.Models.EVModels;
 
 namespace TravelEasy.EV.API.Controllers
 {
@@ -22,104 +20,66 @@ namespace TravelEasy.EV.API.Controllers
             _bookingService = bookingService;
         }
 
-        // Get user booked cars
         [HttpGet("user-booked-cars")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<ICollection<AllEVResponseModel>> GetBookedCars(int userId)
         {
-            // Check if user does not exist
-            if (!_userService.UserExists(userId))
+            if (!_userService.CheckIfUserExists(userId))
             {
                 return Unauthorized("User does not exist");
             }
 
-            var userBookings = _bookingService.GetUserBookings(userId);
+            List<int> userBookedVehiclesIds = _bookingService.GetUserBookedVehicles(userId).Select(ev => ev.Id).ToList();
 
-            //Check if user has any booked cars
-            if (!userBookings.Any())
+            if (!userBookedVehiclesIds.Any())
             {
-                //?
                 return NotFound("User has no booked cars");
             }
-
-            ICollection<AllEVResponseModel> models = new List<AllEVResponseModel>();
-
-            foreach (var booking in userBookings)
-            {
-                ElectricVehicle? car = _vehicleService.GetVehicleByID(booking.ElectricVehicleId);
-
-                AllEVResponseModel newModel = new()
-                {
-                    BrandId = car.BrandId,
-                    Model = car.Model,
-                    PricePerDay = car.PricePerDay
-                };
-
-                models.Add(newModel);
-            }
-            return Ok(models);
+            
+            return Ok(_vehicleService.CreateAllEVResponseModels(userBookedVehiclesIds));
         }
 
-        // Get booking by car Id
         [HttpGet("{carId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public ActionResult<Booking> Get(int carId)
+        public ActionResult<int> Get(int carId)
         {
-            Booking? booking = _bookingService.GetBookingByCarID(carId);
+            int? bookingId = _bookingService.GetBookingByCarID(carId).Id;
 
-            // Check if booking exists
-            if (booking == null)
+            if (bookingId == null)
             {
                 return BadRequest("Car is not booked");
             }
 
-            return Ok(booking);
+            return Ok(bookingId);
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public ActionResult<BookingResponseModel> Post([FromBody] BookingRequestModel request)
+        public ActionResult<int> Post([FromBody] BookingRequestModel request)
         {
-            // Check if user does not exist
-            if (!_userService.UserExists(request.UserId))
+            if (!_userService.CheckIfUserExists(request.UserId))
             {
                 return Unauthorized("User does not exist");
             }
 
-            // Check if car does not exist
-            if (!_vehicleService.VehicleExists(request.CarId))
+            if (!_vehicleService.CheckIfVehicleExists(request.VehicleId))
             {
                 return BadRequest("Car does not exist");
             }
 
-            // Check if car is available
-            if (_vehicleService.VehicleIsBooked(request.CarId))
+            if (_vehicleService.VehicleIsBooked(request.VehicleId))
             {
                 return Ok("Car is already booked");
             }
 
-            Booking newBooking = new()
-            {
-                ElectricVehicleId = request.CarId,
-                UserId = request.UserId,
-                StartDate = request.StartDate,
-                EndDate = request.EndDate
-            };
+            int newBookingId = _bookingService.CreateBooking(request.UserId, request.VehicleId, request.StartDate, request.EndDate);
 
-            _bookingService.AddBooking(newBooking);
-
-            ///?
-            BookingResponseModel model = new()
-            {
-                SuccsessfullyBooked = true
-            };
-
-            return Ok(model);
+            return Ok(newBookingId);
         }
 
         [HttpPut("cancel-booking")]
@@ -129,33 +89,29 @@ namespace TravelEasy.EV.API.Controllers
         public ActionResult<BookingResponseModel> Put([FromBody] BookingRequestModel request)
         {
 
-            // Check if user does not exist
-            if (!_userService.UserExists(request.UserId))
+            if (!_userService.CheckIfUserExists(request.UserId))
             {
                 return Unauthorized("User does not exist");
             }
 
-            // Check if car exists
-            if (!_vehicleService.VehicleExists(request.CarId))
+            if (!_vehicleService.CheckIfVehicleExists(request.VehicleId))
             {
-                return NotFound($"Car with id {request.CarId} doesn't exist");
+                return NotFound($"Car with id {request.VehicleId} doesn't exist");
             }
 
-            Booking? booking = _bookingService.GetBookingByCarID(request.CarId);
+            int? bookingId = _bookingService.GetBookingByCarID(request.VehicleId).Id;
 
-            // Check if car is booked
-            if (booking == null)
+            if (bookingId == null)
             {
                 return BadRequest("Car is not booked");
             }
 
-            // Check if user has booked given car
-            if (booking.UserId != request.UserId)
+            if (_bookingService.GetBookingUserId((int)bookingId) != request.UserId)
             {
                 return BadRequest("Car is booked by another user");
             }
 
-            _bookingService.RemoveBooking(booking);
+            _bookingService.RemoveBooking(_bookingService.GetBookingByID((int)bookingId));
 
             return Ok("Booking cancelled successfully");
         }

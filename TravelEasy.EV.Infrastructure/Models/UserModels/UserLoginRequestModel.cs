@@ -1,4 +1,4 @@
-﻿namespace TravelEasy.EV.API.Models.UserModels
+﻿namespace TravelEasy.EV.Infrastructure.Models.UserModels
 {
     public class UserLoginRequestModel
     {

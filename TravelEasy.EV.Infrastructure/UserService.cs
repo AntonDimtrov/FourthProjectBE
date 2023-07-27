@@ -11,10 +11,28 @@ namespace TravelEasy.EV.Infrastructure
         {
             _EVContext = EVContext;
         }
+        public void AddUserToDB(User user)
+        {
+            _EVContext.Users.Add(user);
+            _EVContext.SaveChanges();
+        }
+
+        public void RemoveUserFromDB(User user)
+        {
+            _EVContext.Users.Remove(user);
+            _EVContext.SaveChanges();
+        }
+
         public bool ExistingUsersInDB()
         {
             return _EVContext.Users.Any();
         }
+
+        public bool CheckIfUserExists(int userId)
+        {
+            return _EVContext.Users.Any(u => u.Id == userId);
+        }
+
         public User GetUserByUsername(string username)
         {
             return _EVContext.Users.Where(u => u.Username == username).FirstOrDefault();
@@ -24,27 +42,24 @@ namespace TravelEasy.EV.Infrastructure
         {
             return _EVContext.Users.Where(u => u.Id == userid).FirstOrDefault();
         }
-
-        public bool UserExists(int userId)
-        {
-            return _EVContext.Users.Where(u => u.Id == userId).Any();
-        }
-
+       
         public ICollection<User> GetUsers()
         {
             return _EVContext.Users.ToList();
         }
 
-        public void AddUser(User user)
+        public int RegisterUser(string username, string email, string password)
         {
-            _EVContext.Users.Add(user);
-            _EVContext.SaveChanges();
-        }
+            User user = new()
+            {
+                Username = username,
+                Email = email,
+                Password = password
+            };
 
-        public void RemoveUser(User user)
-        {
-            _EVContext.Users.Remove(user);
-            _EVContext.SaveChanges();
+            AddUserToDB(user);
+
+            return user.Id;
         }
     }
 }

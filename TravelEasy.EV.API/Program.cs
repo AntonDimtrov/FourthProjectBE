@@ -16,6 +16,8 @@ builder.Services.AddDbContext<ElectricVehiclesContext>(options =>
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IElectricVehicleService, ElectricVehicleService>();
 builder.Services.AddTransient<IBookingService, BookingService>();
+builder.Services.AddTransient<IBrandService, BrandService>();
+builder.Services.AddTransient<ICategoryService, CategoryService>();
 
 var app = builder.Build();
 

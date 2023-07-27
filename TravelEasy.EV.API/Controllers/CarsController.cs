@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TravelEasy.ElectricVehicles.DB.Models;
-using TravelEasy.EV.API.Models.EVModels;
+
 using TravelEasy.EV.Infrastructure.Abstract;
+using TravelEasy.EV.Infrastructure.Models.EVModels;
 
 namespace TravelEasy.EV.API.Controllers
 {
@@ -20,15 +21,14 @@ namespace TravelEasy.EV.API.Controllers
             _bookingService = bookingService;
         }
 
-        // Get all electric vehicles
+        // Get all vehicles
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<ICollection<AllEVResponseModel>> Get([System.Web.Http.FromUri] int userId)
         {
-            // Check if user exists
-            if (!_userService.UserExists(userId))
+            if (!_userService.CheckIfUserExists(userId))
             {
                 return Unauthorized();
             }
@@ -48,7 +48,8 @@ namespace TravelEasy.EV.API.Controllers
                 {
                     BrandId = vehicle.BrandId,
                     Model = vehicle.Model,
-                    PricePerDay = vehicle.PricePerDay
+                    PricePerDay = vehicle.PricePerDay,
+                    ImageURL = vehicle.ImageURL
                 };
 
                 models.Add(newModel);
@@ -64,10 +65,9 @@ namespace TravelEasy.EV.API.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<ICollection<AllEVResponseModel>> GetAvailable([System.Web.Http.FromUri] int userId)
         {
-            // Check if user does not exist
-            if (!_userService.UserExists(userId))
+            if (!_userService.CheckIfUserExists(userId))
             {
-                return Unauthorized("User does not exist");
+                return Unauthorized();
             }
 
             var bookedVehicles = _bookingService.GetAvailableVehicles();
@@ -84,7 +84,8 @@ namespace TravelEasy.EV.API.Controllers
                 {
                     BrandId = vehicle.BrandId,
                     Model = vehicle.Model,
-                    PricePerDay = vehicle.PricePerDay
+                    PricePerDay = vehicle.PricePerDay,
+                    ImageURL = vehicle.ImageURL
                 };
 
                 models.Add(newModel);
@@ -103,12 +104,12 @@ namespace TravelEasy.EV.API.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<EVResponseModel> Get(int id, [System.Web.Http.FromUri] int userId)
         {
-            // Check if user does not exist
-            if (!_userService.UserExists(userId))
+
+            if (!_userService.CheckIfUserExists(userId))
             {
-                return Unauthorized("User does not exist");
+                return Unauthorized();
             }
-           
+
             ElectricVehicle? ev = _vehicleService.GetVehicleByID(id);
 
             if (ev == null)
@@ -123,7 +124,9 @@ namespace TravelEasy.EV.API.Controllers
                 Model = ev.Model,
                 HorsePower = ev.HorsePowers,
                 Range = ev.Range,
-                PricePerDay = ev.PricePerDay
+                PricePerDay = ev.PricePerDay,
+                ImageURL = ev.ImageURL,
+                CategoryId = ev.CategoryId,
             };
 
             return Ok(result);

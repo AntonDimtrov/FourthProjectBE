@@ -1,4 +1,4 @@
-﻿namespace TravelEasy.EV.API.Models.EVModels
+﻿namespace TravelEasy.EV.Infrastructure.Models.EVModels
 {
     public class AllEVResponseModel
     {

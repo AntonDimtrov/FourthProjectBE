@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TravelEasy.ElectricVehicles.DB.Models;
+﻿using TravelEasy.ElectricVehicles.DB.Models;
 
 namespace TravelEasy.EV.Infrastructure.Abstract
 {
     public interface IUserService
     {
-        public bool UserExists(int userid);
+        public bool CheckIfUserExists(int userid);
         public User GetUserByID(int userid);
         public bool ExistingUsersInDB();
         public User GetUserByUsername(string username);
         public ICollection<User> GetUsers();
-        public void AddUser(User user);
-        public void RemoveUser(User user);
+        public void AddUserToDB(User user);
+        public void RemoveUserFromDB(User user);
+        public int RegisterUser(string username, string email, string password);
     }
 }
