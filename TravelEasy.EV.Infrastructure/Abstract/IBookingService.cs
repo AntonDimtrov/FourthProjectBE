@@ -1,5 +1,6 @@
 ﻿using TravelEasy.ElectricVehicles.DB.Models;
 using TravelEasy.EV.DB.Models.Diesel;
+using TravelEasy.EV.Infrastructure.Models.BookingModels;
 
 namespace TravelEasy.EV.Infrastructure.Abstract
 {
@@ -11,12 +12,15 @@ namespace TravelEasy.EV.Infrastructure.Abstract
         public Booking GetBookingByCarID(int bookingId);
         public ICollection<ElectricVehicle> GetBookedVehicles();
         public ICollection<ElectricVehicle> GetAvailableVehicles();
-        public void AddBooking(Booking booking);
-        public void RemoveBooking(Booking booking);
+        public void AddBookingToDB(Booking booking);
+        public void RemoveBookingFromDB(Booking booking);
         public ICollection<Booking> GetBookings();
-        public ICollection<ElectricVehicle> GetUserBookedVehicles(int userId);
-        public int? GetBookingUserId(int bookingId);
-        public int? GetBookingVehicleId(int bookingId);
+        public ICollection<int> GetUserBookedVehicleIds(int userId);
+        public int GetBookingUserId(int bookingId);
+        public int GetBookingVehicleId(int bookingId);
         public int CreateBooking(int userId, int vehicleId, DateTime startDate, DateTime endDate);
+        ICollection<BookingResponseModel> CreateBookingResponseModels(List<int> bookingIds);
+        bool VehicleIsBooked(int vehicleId);
+        bool ExisitingBookingsInDB();
     }
 }

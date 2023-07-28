@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TravelEasy.ElectricVehicles.DB.Models;
-
 using TravelEasy.EV.Infrastructure.Abstract;
 using TravelEasy.EV.Infrastructure.Models.EVModels;
 
@@ -21,51 +19,35 @@ namespace TravelEasy.EV.API.Controllers
             _bookingService = bookingService;
         }
 
-        // Get all vehicles
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<ICollection<AllEVResponseModel>> Get([System.Web.Http.FromUri] int userId)
         {
-            if (!_userService.CheckIfUserExists(userId))
+            if (!_userService.CheckIfUserExistsById(userId))
             {
                 return Unauthorized();
             }
 
-            var vehicles = _vehicleService.GetVehicles();
-
-            if (!vehicles.Any())
+            if (!_vehicleService.ExistingVehiclesInDB())
             {
-                return Ok("No EVs in database");
+                return NotFound();
             }
 
-            ICollection<AllEVResponseModel> models = new List<AllEVResponseModel>();
-
-            foreach (var vehicle in vehicles)
-            {
-                AllEVResponseModel newModel = new()
-                {
-                    BrandId = vehicle.BrandId,
-                    Model = vehicle.Model,
-                    PricePerDay = vehicle.PricePerDay,
-                    ImageURL = vehicle.ImageURL
-                };
-
-                models.Add(newModel);
-            }
+            ICollection<AllEVResponseModel> models = _vehicleService
+                .CreateAllEVResponseModels(_vehicleService.GetVehicles().Select(v=>v.Id).ToList());
 
             return Ok(models);
         }
 
-        // Get all available electric vehicles
         [HttpGet("available")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<ICollection<AllEVResponseModel>> GetAvailable([System.Web.Http.FromUri] int userId)
         {
-            if (!_userService.CheckIfUserExists(userId))
+            if (!_userService.CheckIfUserExistsById(userId))
             {
                 return Unauthorized();
             }
@@ -94,9 +76,6 @@ namespace TravelEasy.EV.API.Controllers
             return Ok(models);
         }
 
-
-
-        // Get by ID
         [HttpGet]
         [Route("id")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -105,31 +84,17 @@ namespace TravelEasy.EV.API.Controllers
         public ActionResult<EVResponseModel> Get(int id, [System.Web.Http.FromUri] int userId)
         {
 
-            if (!_userService.CheckIfUserExists(userId))
+            if (!_userService.CheckIfUserExistsById(userId))
             {
                 return Unauthorized();
             }
 
-            ElectricVehicle? ev = _vehicleService.GetVehicleByID(id);
-
-            if (ev == null)
+            if (!_vehicleService.CheckIfVehicleExists(id))
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            EVResponseModel result = new()
-            {
-
-                BrandId = ev.BrandId,
-                Model = ev.Model,
-                HorsePower = ev.HorsePowers,
-                Range = ev.Range,
-                PricePerDay = ev.PricePerDay,
-                ImageURL = ev.ImageURL,
-                CategoryId = ev.CategoryId,
-            };
-
-            return Ok(result);
+            return Ok(_vehicleService.CreateEVResponseModel(_vehicleService.GetVehicleByID(id)));
         }
     }
 }

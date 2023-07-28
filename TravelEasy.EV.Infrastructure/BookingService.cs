@@ -2,14 +2,16 @@
 using TravelEasy.EV.DataLayer;
 using TravelEasy.EV.DB.Models.Diesel;
 using TravelEasy.EV.Infrastructure.Abstract;
+using TravelEasy.EV.Infrastructure.Models.BookingModels;
+using TravelEasy.EV.Infrastructure.Models.EVModels;
 
 namespace TravelEasy.EV.Infrastructure
 {
     public class BookingService : IBookingService
     {
         private readonly ElectricVehiclesContext _EVContext;
-        private readonly IUserService _userService;
         private readonly IElectricVehicleService _vehicleService;
+        private readonly IUserService _userService;
 
         public BookingService(ElectricVehiclesContext EVContext, IElectricVehicleService vehicleService, IUserService userService)
         {
@@ -18,13 +20,18 @@ namespace TravelEasy.EV.Infrastructure
             _userService = userService;
         }
 
-        public void AddBooking(Booking booking)
+        public bool ExisitingBookingsInDB()
+        {
+            return _EVContext.Bookings.Any();
+        }
+
+        public void AddBookingToDB(Booking booking)
         {
             _EVContext.Bookings.Add(booking);
             _EVContext.SaveChanges();
         }
 
-        public void RemoveBooking(Booking booking)
+        public void RemoveBookingFromDB(Booking booking)
         {
             _EVContext.Bookings.Remove(booking);
             _EVContext.SaveChanges();
@@ -64,7 +71,7 @@ namespace TravelEasy.EV.Infrastructure
 
         public ICollection<Booking> GetBookings()
         {
-            throw new NotImplementedException();
+            return _EVContext.Bookings.ToList();
         }
 
         public ICollection<Booking> GetUserBookings(int userId)
@@ -74,12 +81,16 @@ namespace TravelEasy.EV.Infrastructure
 
             return userBookings.ToList();
         }
-        public ICollection<ElectricVehicle> GetUserBookedVehicles(int userId)
-        {
-            List<int> userBookedVehicleIds = _EVContext.Bookings.Where(b => b.UserId == userId).Select(b => b.ElectricVehicleId).ToList();
 
-            return userBookedVehicleIds.Any() ? _EVContext.ElectricVehicles.Where(ev => userBookedVehicleIds.Contains(ev.Id)).ToList() : null;
+        public ICollection<int> GetUserBookedVehicleIds(int userId)
+        {
+            List<int> userBookedVehicleIds = GetUserBookings(userId)
+                .Select(b => b.ElectricVehicleId)
+                .ToList();
+
+            return userBookedVehicleIds;
         }
+
         public int CreateBooking(int userId, int vehicleId, DateTime startDate, DateTime endDate)
         {
             Booking newBooking = new()
@@ -92,21 +103,46 @@ namespace TravelEasy.EV.Infrastructure
                 ElectricVehicle = _vehicleService.GetVehicleByID(vehicleId)
             };
 
-            AddBooking(newBooking);
+            AddBookingToDB(newBooking);
 
             return newBooking.Id;
         }
 
-        public int? GetBookingUserId(int bookingId)
+        public int GetBookingUserId(int bookingId)
         {
             return _EVContext.Bookings
                 .FirstOrDefault(b => b.Id == bookingId)
                 .UserId;
         }
 
-        public int? GetBookingVehicleId(int bookingId)
+        public bool VehicleIsBooked(int vehicleId)
+        {
+            return _EVContext.Bookings.Where(b => b.ElectricVehicleId == vehicleId).Any();
+        }
+
+        public int GetBookingVehicleId(int bookingId)
         {
             return _EVContext.Bookings.FirstOrDefault(b => b.Id == bookingId).ElectricVehicleId;
+        }
+
+        public ICollection<BookingResponseModel> CreateBookingResponseModels(List<int> bookingIds)
+        {
+            ICollection<BookingResponseModel> models = new List<BookingResponseModel>();
+
+            foreach (var bookingId in bookingIds)
+            {
+                Booking booking = GetBookingByID(bookingId);
+
+                BookingResponseModel newModel = new()
+                {
+                    UserId = booking.UserId,
+                    VehicleId = booking.ElectricVehicleId
+                };
+
+                models.Add(newModel);
+            }
+
+            return models;
         }
     }
 }

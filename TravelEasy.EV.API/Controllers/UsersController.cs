@@ -25,8 +25,12 @@ namespace TravelEasy.EV.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<UserLoginRequestModel> Get(int id)
         {
-            var user = _userService.GetUserByID(id);
-            return user == null ? NotFound() : Ok(user);
+            if (_userService.CheckIfUserExistsById(id))
+            {
+                return BadRequest();
+            }
+
+            return Ok(_userService.GetUserByID(id));
         }
 
         [HttpGet]
@@ -44,14 +48,14 @@ namespace TravelEasy.EV.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult Post([FromBody] UserLoginRequestModel model)
         {
-            int? userId = _userService.GetUserByUsername(model.Username).Id;
-
-            if (userId == null)
+            if (_userService.CheckIfUserExistsByUsername(model.Username))
             {
                 return BadRequest();
             }
 
-            if (_userService.GetUserByID((int)userId).Password != model.Password)
+            int userId = _userService.GetUserByUsername(model.Username).Id;
+
+            if (_userService.GetUserByID(userId).Password != model.Password)
             {
                 return BadRequest();
             }
@@ -65,23 +69,28 @@ namespace TravelEasy.EV.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult Post([FromBody] UserRegisterRequestModel model)
         {
-            int? userId = _userService.GetUserByUsername(model.Username).Id;
-
-            if (userId != null)
+            if (_userService.CheckIfUserExistsByUsername(model.Username))
             {
                 return BadRequest();
             }
 
-            _userService.RegisterUser(model.Username, model.Email, model.Password);
+            int userId = _userService.RegisterUser(model.Username, model.Email, model.Password);
 
             return Created(nameof(UsersController), userId);
         }
 
         [HttpDelete]
         [Route("{id}")]
-        public void Remove(int id)
+        public ActionResult Remove(int id)
         {
+            if (!_userService.CheckIfUserExistsById(id))
+            {
+                return BadRequest();
+            }
+
             _userService.RemoveUserFromDB(_userService.GetUserByID(id));
+
+            return Ok();
         }
     }
 }

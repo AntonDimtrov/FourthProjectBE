@@ -12,13 +12,13 @@ namespace TravelEasy.EV.Infrastructure
             _EVContext = EVContext;
         }
 
-        public void AddBrand(Brand brand)
+        public void AddBrandToDB(Brand brand)
         {
             _EVContext.Brands.Add(brand);
             _EVContext.SaveChanges();
         }
 
-        public void RemoveBrand(Brand brand)
+        public void RemoveBrandFromDB(Brand brand)
         {
             _EVContext.Brands.Remove(brand);
             _EVContext.SaveChanges();

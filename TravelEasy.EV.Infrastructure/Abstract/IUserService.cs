@@ -4,7 +4,7 @@ namespace TravelEasy.EV.Infrastructure.Abstract
 {
     public interface IUserService
     {
-        public bool CheckIfUserExists(int userid);
+        public bool CheckIfUserExistsById(int userid);
         public User GetUserByID(int userid);
         public bool ExistingUsersInDB();
         public User GetUserByUsername(string username);
@@ -12,5 +12,6 @@ namespace TravelEasy.EV.Infrastructure.Abstract
         public void AddUserToDB(User user);
         public void RemoveUserFromDB(User user);
         public int RegisterUser(string username, string email, string password);
+        bool CheckIfUserExistsByUsername(string username);
     }
 }

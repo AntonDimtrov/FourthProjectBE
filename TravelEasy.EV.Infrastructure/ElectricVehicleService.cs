@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using TravelEasy.ElectricVehicles.DB.Models;
 using TravelEasy.EV.DataLayer;
+using TravelEasy.EV.DB.Models.Diesel;
 using TravelEasy.EV.Infrastructure.Abstract;
 using TravelEasy.EV.Infrastructure.Models.EVModels;
 
@@ -10,18 +11,19 @@ namespace TravelEasy.EV.Infrastructure
     {
         private readonly ElectricVehiclesContext _EVContext;
         private readonly IBrandService _brandService;
-        private readonly IElectricVehicleService _vehicleService;
         private readonly ICategoryService _categoryService;
         public ElectricVehicleService(
             ElectricVehiclesContext EVContext,
             IBrandService brandService,
-            IElectricVehicleService vehicleService,
             ICategoryService categoryService)
         {
             _EVContext = EVContext;
             _brandService = brandService;
-            _vehicleService = vehicleService;
             _categoryService = categoryService;
+        }
+        public bool ExistingVehiclesInDB()
+        {
+            return _EVContext.ElectricVehicles.Any();
         }
 
         public void AddVehicleToDB(ElectricVehicle vehicle)
@@ -40,12 +42,7 @@ namespace TravelEasy.EV.Infrastructure
         {
             return _EVContext.ElectricVehicles.Any(ev => ev.Id == vehicleId);
         }
-
-        public bool VehicleIsBooked(int vehicleId)
-        {
-            return _EVContext.Bookings.Where(ev => ev.Id == vehicleId).Any();
-        }
-
+       
         public ICollection<ElectricVehicle> GetVehicles()
         {
             return _EVContext.ElectricVehicles.ToList();
@@ -122,21 +119,63 @@ namespace TravelEasy.EV.Infrastructure
 
             return newModel;
         }
+
+      
         public ICollection<AllEVResponseModel> CreateAllEVResponseModels(List<int> vehicleIds)
         {
             ICollection<AllEVResponseModel> models = new List<AllEVResponseModel>();
 
             foreach (var vehicleId in vehicleIds)
             {
-                ElectricVehicle vehicle = _vehicleService.GetVehicleByID(vehicleId);
+                ElectricVehicle vehicle = GetVehicleByID(vehicleId);
 
-                AllEVResponseModel newModel = new()
-                {
-                    BrandId = vehicle.BrandId,
-                    Model = vehicle.Model,
-                    PricePerDay = vehicle.PricePerDay,
-                    ImageURL = vehicle.ImageURL
-                };
+                AllEVResponseModel newModel = CreateAllEVResponseModel(vehicle.BrandId, vehicle.Model, vehicle.PricePerDay, vehicle.ImageURL);
+
+                models.Add(newModel);
+            }
+
+            return models;
+        }
+
+        public EVResponseModel CreateEVResponseModel(int brandId, string model, int horsePower, int Range, decimal pricePerDay, string imageURL, int categoryId)
+        {
+            EVResponseModel newModel = new()
+            {
+                BrandId = brandId,
+                Model = model,
+                HorsePowers = horsePower,
+                Range = Range,
+                PricePerDay = pricePerDay,
+                ImageURL = imageURL,
+                CategoryId = categoryId
+            };
+
+            return newModel;
+        }
+
+        public EVResponseModel CreateEVResponseModel(ElectricVehicle ev)
+        {
+            EVResponseModel newModel = new()
+            {
+                BrandId = ev.BrandId,
+                Model = ev.Model,
+                HorsePowers = ev.HorsePowers,
+                Range = ev.Range,
+                PricePerDay = ev.PricePerDay,
+                ImageURL = ev.ImageURL,
+                CategoryId = ev.CategoryId
+            };
+
+            return newModel;
+        }
+
+        public ICollection<EVResponseModel> CreateEVResponseModels(List<int> vehicleIds)
+        {
+            ICollection<EVResponseModel> models = new List<EVResponseModel>();
+
+            foreach (var vehicleId in vehicleIds)
+            {
+                EVResponseModel newModel = CreateEVResponseModel(GetVehicleByID(vehicleId));
 
                 models.Add(newModel);
             }

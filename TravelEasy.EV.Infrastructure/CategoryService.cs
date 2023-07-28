@@ -26,15 +26,22 @@ namespace TravelEasy.EV.Infrastructure
         {
             return new Category { Name = categoryName };
         }
-        public void AddCategory(Category category)
+
+        public void AddCategoryToDB(Category category)
         {
             _EVContext.Add(category);
             _EVContext.SaveChanges();
         }
-        public void RemoveCategory(Category category)
+
+        public void RemoveCategoryFromDB(Category category)
         {
             _EVContext.Remove(category);
             _EVContext.SaveChanges();
+        }
+
+        public bool CheckIfCategoryExists(int categoryId)
+        {
+            return _EVContext.Categories.Any(c => c.Id == categoryId);
         }
     }
 }

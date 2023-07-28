@@ -28,9 +28,14 @@ namespace TravelEasy.EV.Infrastructure
             return _EVContext.Users.Any();
         }
 
-        public bool CheckIfUserExists(int userId)
+        public bool CheckIfUserExistsById(int userId)
         {
             return _EVContext.Users.Any(u => u.Id == userId);
+        }
+
+        public bool CheckIfUserExistsByUsername(string username)
+        {
+            return _EVContext.Users.Any(u => u.Username == username);
         }
 
         public User GetUserByUsername(string username)
